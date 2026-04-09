@@ -25,4 +25,4 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        from_attributes = True  # Allows reading from SQLAlchemy models
+        from_attributes = True

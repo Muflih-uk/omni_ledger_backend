@@ -40,8 +40,8 @@ class BillItem(Base):
     __tablename__ = "bill_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    bill_id = Column(Integer, ForeignKey="bills.id")
-    item_id = Column(Integer, ForeignKey="items.id")
+    bill_id = Column(Integer, ForeignKey("bills.id"))
+    item_id = Column(Integer, ForeignKey("items.id"))
     quantity = Column(Integer, nullable=False, default=1)
     price = Column(Float, nullable=False)
 
