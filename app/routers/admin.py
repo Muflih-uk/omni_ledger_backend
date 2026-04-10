@@ -43,6 +43,7 @@ def create_user(
         name=user_data.name,
         phone=user_data.phone,
         password_hash=hash_password(user_data.password),
+        is_active=True,
     )
 
     db.add(new_user)
