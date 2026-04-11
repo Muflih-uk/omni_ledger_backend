@@ -62,6 +62,30 @@ def get_bills(
     return [_format_bill(b, db) for b in bills]
 
 
+@router.get("/paid", response_model=List[BillResponse])
+def get_paid_bills(
+    db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)
+):
+    bills = (
+        db.query(Bill)
+        .filter(Bill.owner_id == user_id, Bill.payment_status == "paid")
+        .all()
+    )
+    return [_format_bill(b, db) for b in bills]
+
+
+@router.get("/unpaid", response_model=List[BillResponse])
+def get_unpaid_bills(
+    db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)
+):
+    bills = (
+        db.query(Bill)
+        .filter(Bill.owner_id == user_id, Bill.payment_status == "unpaid")
+        .all()
+    )
+    return [_format_bill(b, db) for b in bills]
+
+
 @router.get("/{bill_id}", response_model=BillResponse)
 def get_bill(
     bill_id: int,
