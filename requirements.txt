@@ -1,6 +1,5 @@
 annotated-types==0.7.0
 anyio==4.9.0
-apturl==0.5.2
 argcomplete==1.8.1
 asgiref==3.11.0
 astroid==3.3.8
