@@ -15,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_current_user_id(token: str = Depends(oauth2_scheme)):
     payload = decode_token(token)
-    if not payload:
+    if not payload or "sub" not in payload or "error" in payload:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
     return int(payload["sub"])
 

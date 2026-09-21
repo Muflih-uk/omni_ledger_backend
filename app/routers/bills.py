@@ -128,14 +128,18 @@ def send_sms(
 def _format_bill(bill: Bill, db: Session) -> dict:
     items = []
     for bi in bill.bill_items:
-        item = db.query(Item).filter(Item.id == bi.item_id).first()
+        item = (
+            db.query(Item).filter(Item.id == bi.item_id).first()
+            if bi.item_id is not None
+            else None
+        )
         items.append(
             {
                 "id": bi.id,
-                "item_id": bi.item_id,
+                "item_id": bi.item_id if bi.item_id is not None else 0,
                 "item_name": item.name if item else "Unknown",
-                "quantity": bi.quantity,
-                "price": bi.price,
+                "quantity": bi.quantity if bi.quantity is not None else 1,
+                "price": bi.price if bi.price is not None else 0.0,
             }
         )
     payment_status = bill.payment_status
@@ -143,8 +147,8 @@ def _format_bill(bill: Bill, db: Session) -> dict:
         payment_status = PaymentStatus.unpaid
     return {
         "id": bill.id,
-        "customer_name": bill.customer_name,
-        "customer_phone": bill.customer_phone,
+        "customer_name": bill.customer_name or "Unknown",
+        "customer_phone": bill.customer_phone or "",
         "total_amount": bill.total_amount if bill.total_amount is not None else 0.0,
         "payment_status": payment_status,
         "created_at": bill.created_at,
