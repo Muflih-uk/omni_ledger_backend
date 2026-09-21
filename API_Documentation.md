@@ -570,7 +570,7 @@ On failure (e.g., invalid Twilio config):
 | `customer_phone` | string | Customer phone |
 | `total_amount` | float | Computed total (`Σ unit_price × quantity`) |
 | `payment_status` | enum | `paid` or `unpaid` |
-| `created_at` | datetime | UTC creation timestamp |
+| `created_at` | datetime | UTC creation timestamp (may be `null` for legacy rows) |
 | `owner_id` | integer (FK) | The user who owns the bill |
 
 ### BillItem
@@ -604,6 +604,8 @@ On failure (e.g., invalid Twilio config):
 
 5. **SMS is a best-effort call.** `send_bill_sms` catches all exceptions and returns `"SMS failed"` with HTTP `200` — check the `message` field to detect failure.
 
-6. **Register does not auto-login.** `POST /auth/register` returns the user object only; call `POST /auth/login` afterwards to receive an access token.
+6. **Malformed bill rows are normalized on read.** Bills with a `NULL`/invalid `payment_status` are returned as `"unpaid"`, and `NULL` `total_amount` is returned as `0.0`. `created_at` may be `null` for legacy rows.
 
-7. **CORS is wide open.** All origins, methods, and headers are allowed (`allow_origins=["*"]`), which is fine for development but should be tightened for production.
+7. **Register does not auto-login.** `POST /auth/register` returns the user object only; call `POST /auth/login` afterwards to receive an access token.
+
+8. **CORS is wide open.** All origins, methods, and headers are allowed (`allow_origins=["*"]`), which is fine for development but should be tightened for production.

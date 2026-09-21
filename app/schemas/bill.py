@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -35,7 +35,7 @@ class BillResponse(BaseModel):
     customer_phone: str
     total_amount: float
     payment_status: PaymentStatus
-    created_at: datetime
+    created_at: Optional[datetime]
     items: List[BillItemResponse] = []
 
     class Config:

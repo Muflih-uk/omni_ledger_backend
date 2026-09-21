@@ -138,12 +138,15 @@ def _format_bill(bill: Bill, db: Session) -> dict:
                 "price": bi.price,
             }
         )
+    payment_status = bill.payment_status
+    if payment_status not in (PaymentStatus.paid, PaymentStatus.unpaid):
+        payment_status = PaymentStatus.unpaid
     return {
         "id": bill.id,
         "customer_name": bill.customer_name,
         "customer_phone": bill.customer_phone,
-        "total_amount": bill.total_amount,
-        "payment_status": bill.payment_status,
+        "total_amount": bill.total_amount if bill.total_amount is not None else 0.0,
+        "payment_status": payment_status,
         "created_at": bill.created_at,
         "items": items,
     }
