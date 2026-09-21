@@ -302,11 +302,13 @@ Deletes an item by ID.
 
 ### Bills
 
-All endpoints in this section require a **user** bearer token, and bills are scoped to the authenticated user (`owner_id`).
+All endpoints in this section require a **user** bearer token.
 
 ```
 Authorization: Bearer <user_access_token>
 ```
+
+> ⚠️ **Note:** Bills are **not scoped to the owning user** — like Items, all bills are visible to any authenticated user regardless of which account created them (`owner_id` is still recorded on the bill).
 
 #### `POST /bills`
 
@@ -596,10 +598,12 @@ On failure (e.g., invalid Twilio config):
 
 2. **Items are not ownership-scoped.** `GET /items` returns every item in the table regardless of which user created it.
 
-3. **Enum values are lowercase strings.** `payment_status` uses `"paid"` / `"unpaid"` (not capitalized).
+3. **Bills are not ownership-scoped.** `GET /bills` (and `/paid`, `/unpaid`, `/{bill_id}`, payment toggle, and SMS endpoints) operate on every bill in the table, not just those created by the logged-in user. `owner_id` is still recorded when a bill is created but is not used to filter reads.
 
-4. **SMS is a best-effort call.** `send_bill_sms` catches all exceptions and returns `"SMS failed"` with HTTP `200` — check the `message` field to detect failure.
+4. **Enum values are lowercase strings.** `payment_status` uses `"paid"` / `"unpaid"` (not capitalized).
 
-5. **Register does not auto-login.** `POST /auth/register` returns the user object only; call `POST /auth/login` afterwards to receive an access token.
+5. **SMS is a best-effort call.** `send_bill_sms` catches all exceptions and returns `"SMS failed"` with HTTP `200` — check the `message` field to detect failure.
 
-6. **CORS is wide open.** All origins, methods, and headers are allowed (`allow_origins=["*"]`), which is fine for development but should be tightened for production.
+6. **Register does not auto-login.** `POST /auth/register` returns the user object only; call `POST /auth/login` afterwards to receive an access token.
+
+7. **CORS is wide open.** All origins, methods, and headers are allowed (`allow_origins=["*"]`), which is fine for development but should be tightened for production.
