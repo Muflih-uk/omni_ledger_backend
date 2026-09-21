@@ -6,7 +6,9 @@ info:
 http:
   method: GET
   url: "{{BASE_URL}}/bills"
-  auth: inherit
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZSI6InVzZXIiLCJleHAiOjE4MjYyNTA0MDl9.PXH7FQYjbNrnvUVWI-gvk0IS4qVuKGr3Zj-DhqlZFvI
 
 settings:
   encodeUrl: true
