@@ -16,3 +16,4 @@ class User(Base):
     is_active = Column(Boolean, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     bills = relationship("Bill", back_populates="owner")
+    items = relationship("Item", back_populates="owner")

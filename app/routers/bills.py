@@ -24,7 +24,11 @@ def create_bill(
     bill_items_to_create = []
 
     for entry in bill_data.items:
-        item = db.query(Item).filter(Item.id == entry.item_id).first()
+        item = (
+            db.query(Item)
+            .filter(Item.id == entry.item_id, Item.owner_id == user_id)
+            .first()
+        )
         if not item:
             raise HTTPException(
                 status_code=404, detail=f"Item {entry.item_id} not found"
@@ -58,7 +62,7 @@ def create_bill(
 def get_bills(
     db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)
 ):
-    bills = db.query(Bill).all()
+    bills = db.query(Bill).filter(Bill.owner_id == user_id).all()
     return [_format_bill(b, db) for b in bills]
 
 
@@ -66,7 +70,11 @@ def get_bills(
 def get_paid_bills(
     db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)
 ):
-    bills = db.query(Bill).filter(Bill.payment_status == "paid").all()
+    bills = (
+        db.query(Bill)
+        .filter(Bill.owner_id == user_id, Bill.payment_status == "paid")
+        .all()
+    )
     return [_format_bill(b, db) for b in bills]
 
 
@@ -74,7 +82,11 @@ def get_paid_bills(
 def get_unpaid_bills(
     db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)
 ):
-    bills = db.query(Bill).filter(Bill.payment_status == "unpaid").all()
+    bills = (
+        db.query(Bill)
+        .filter(Bill.owner_id == user_id, Bill.payment_status == "unpaid")
+        .all()
+    )
     return [_format_bill(b, db) for b in bills]
 
 
@@ -84,7 +96,11 @@ def get_bill(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    bill = db.query(Bill).filter(Bill.id == bill_id).first()
+    bill = (
+        db.query(Bill)
+        .filter(Bill.id == bill_id, Bill.owner_id == user_id)
+        .first()
+    )
     if not bill:
         raise HTTPException(status_code=404, detail="Bill not found")
     return _format_bill(bill, db)
@@ -96,7 +112,11 @@ def toggle_payment_status(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    bill = db.query(Bill).filter(Bill.id == bill_id).first()
+    bill = (
+        db.query(Bill)
+        .filter(Bill.id == bill_id, Bill.owner_id == user_id)
+        .first()
+    )
     if not bill:
         raise HTTPException(status_code=404, detail="Bill not found")
 
@@ -116,7 +136,11 @@ def send_sms(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    bill = db.query(Bill).filter(Bill.id == bill_id).first()
+    bill = (
+        db.query(Bill)
+        .filter(Bill.id == bill_id, Bill.owner_id == user_id)
+        .first()
+    )
     if not bill:
         raise HTTPException(status_code=404, detail="Bill not found")
 
@@ -129,7 +153,12 @@ def _format_bill(bill: Bill, db: Session) -> dict:
     items = []
     for bi in bill.bill_items:
         item = (
-            db.query(Item).filter(Item.id == bi.item_id).first()
+            db.query(Item)
+            .filter(
+                Item.id == bi.item_id,
+                Item.owner_id == bill.owner_id,
+            )
+            .first()
             if bi.item_id is not None
             else None
         )

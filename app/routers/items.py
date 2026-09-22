@@ -26,7 +26,9 @@ def create_item(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    new_item = Item(name=item_data.name, unit_price=item_data.unit_price)
+    new_item = Item(
+        name=item_data.name, unit_price=item_data.unit_price, owner_id=user_id
+    )
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
@@ -37,9 +39,7 @@ def create_item(
 def get_items(
     db: Session = Depends(get_db), user_id: int = Depends(get_current_user_id)
 ):
-
-    query = db.query(Item)
-    return query.all()
+    return db.query(Item).filter(Item.owner_id == user_id).all()
 
 
 @router.put("/{item_id}", response_model=ItemResponse)
@@ -49,7 +49,11 @@ def update_item(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    item = db.query(Item).filter(Item.id == item_id).first()
+    item = (
+        db.query(Item)
+        .filter(Item.id == item_id, Item.owner_id == user_id)
+        .first()
+    )
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
     if updates.name:
@@ -67,9 +71,18 @@ def delete_item(
     db: Session = Depends(get_db),
     user_id: int = Depends(get_current_user_id),
 ):
-    item = db.query(Item).filter(Item.id == item_id).first()
+    item = (
+        db.query(Item)
+        .filter(Item.id == item_id, Item.owner_id == user_id)
+        .first()
+    )
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
+    if item.bill_items:
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete item: it is used in one or more bills",
+        )
     db.delete(item)
     db.commit()
     return {"message": "Item removed"}
